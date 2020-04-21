@@ -14,6 +14,7 @@ int main(int argc, char **argv) {
   int i;
   unsigned int currentbyte;
   unsigned int previousbyte;
+  unsigned int opcodebyte;
   int paramcount;
   int addrmode;
   char *opcode;
@@ -106,21 +107,22 @@ int main(int argc, char **argv) {
     previousbyte = currentbyte;
     currentbyte = ((unsigned char * ) buffer)[i];
     if (paramcount == 0) {
-      printf("%04X   ", address);                           //Display current address at beginning of line
-      paramcount = opcode_props[currentbyte][0];            //Get instruction length
-      opcode = instruction[opcode_props[currentbyte][1]];   //Get opcode name
-      addrmode = opcode_props[currentbyte][2];              //Get info required to display addressing mode
-      pre = modes[addrmode][0];                             //Look up pre-operand formatting text
-      post = modes[addrmode][1];                            //Look up post-operand formatting text
-      pad = padding[(paramcount - 1)];                      //Calculate correct padding for output alignment
-      address = address + paramcount;                       //Increment address
+      opcodebyte = currentbyte;
+      printf("%04X   ", address);                          //Display current address at beginning of line
+      paramcount = opcode_props[opcodebyte][0];            //Get instruction length
+      opcode = instruction[opcode_props[opcodebyte][1]];   //Get opcode name
+      addrmode = opcode_props[opcodebyte][2];              //Get info required to display addressing mode
+      pre = modes[addrmode][0];                            //Look up pre-operand formatting text
+      post = modes[addrmode][1];                           //Look up post-operand formatting text
+      pad = padding[(paramcount - 1)];                     //Calculate correct padding for output alignment
+      address = address + paramcount;                      //Increment address
     }
-    if (paramcount != 0)                                    //Keep track of possition within instruction
+    if (paramcount != 0)                                   //Keep track of possition within instruction
       paramcount = paramcount - 1;
-    printf("%02X ", currentbyte);                            //Display the current byte in HEX
+    printf("%02X ", currentbyte);                          //Display the current byte in HEX
     if (paramcount == 0) {
-      if ( (previousbyte & 0xf)  == 7 || (previousbyte & 0xf) == 0xf ){
-        printf(" %s %s%X %s", pad, opcode, (previousbyte >> 4)&0x7, pre);                  //Pad text, display instruction name and pre-operand chars
+      if ( (opcodebyte & 0xf)  == 7 || (opcodebyte & 0xf) == 0xf ){
+        printf(" %s %s%X %s", pad, opcode, (opcodebyte >> 4)&0x7, pre);  //Pad text, display instruction name and pre-operand chars
       } else {
         printf(" %s %s %s", pad, opcode, pre);              //Pad text, display instruction name and pre-operand chars
       }
