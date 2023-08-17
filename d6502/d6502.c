@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
   FILE *file;
   uint8_t *buffer;
   unsigned long fileLen;
-  int address;
+  int address = 0;
   int i;
   unsigned int currentbyte;
   unsigned int previousbyte;
@@ -96,13 +96,17 @@ int main(int argc, char **argv) {
   fread((char *)buffer, fileLen, 1, file);                  //Read entire file into buffer and...
   fclose(file);                                             //...close file
 
-  paramcount = 0;
-  printf("                  RUN %04X \n", address);         //Display org address
-
   int skip = 0;
   if ( buffer[0] == 0x80U && buffer[1] == 0x08 ){
     skip = 10;
+    if ( !address ){
+      address = buffer[2]<<8|buffer[3];
+    }
   }
+
+  paramcount = 0;
+  printf("                  RUN $%04X \n", address);         //Display org address
+
   for (i = skip; i < fileLen; ++i) {                        //Start proccessing loop.
     previousbyte = currentbyte;
     currentbyte = ((unsigned char * ) buffer)[i];
